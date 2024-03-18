@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: public.ecr.aws/g8r2d9x2/product:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8084
+        env:
+          - name: JDBC_DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: spring-boot-app-secret
+                key: JDBC_DATABASE_URL
+          - name: JDBC_DATABASE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: spring-boot-app-secret
+                key: JDBC_DATABASE_USERNAME
+          - name: JDBC_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: spring-boot-app-secret
+                key: JDBC_DATABASE_PASSWORD
+          - name: MINIO_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minio-secret
+                key: MINIO_ACCESS_KEY
+          - name: MINIO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minio-secret
+                key: MINIO_SECRET_KEY
+          - name: MINIO_URL
+            value: http://minio-service:9000
+

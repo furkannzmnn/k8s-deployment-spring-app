@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    app: minio
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: minio
+    template:
+        metadata:
+            labels:
+                app: minio
+        spec:
+            containers:
+                - name: minio
+                  image: 'minio/minio:latest'
+                  imagePullPolicy: IfNotPresent
+                  args:
+                      - server
+                      - /data
+                  ports:
+                      - containerPort: 9000
+                  env:
+                      - name: MINIO_ROOT_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: minio-secret
+                                key: MINIO_ACCESS_KEY
+                      - name: MINIO_ROOT_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: minio-secret
+                                key: MINIO_SECRET_KEY
+                  volumeMounts:
+                      - mountPath: /data
+                        name: minio-data
+            volumes:
+                - name: minio-data
+                  persistentVolumeClaim:
+                      claimName: minio-pv-claim
